@@ -1,108 +1,125 @@
-// Load map data from the JSON file
-fetch('data/maps.json')
-  .then(response => response.json())
-  .then(data => {
-    window.mapsData = data; // Store data globally for easy access
-    applyFilters(); // Apply initial filters and display maps
-  });
-
 function updateSliderValue(spanId, slider) {
-  var value = slider.value;
-  var sliderRect = slider.getBoundingClientRect();
-  var thumbWidth = 20;
-  var sliderWidth = sliderRect.width - thumbWidth;
+    var value = slider.value;
+    var sliderRect = slider.getBoundingClientRect();
+    var thumbWidth = 20;
+    var sliderWidth = sliderRect.width - thumbWidth;
 
-  var min = slider.min;
-  var max = slider.max;
+    var min = slider.min;
+    var max = slider.max;
 
-  var position = ((value - min) / (max - min)) * sliderWidth;
-  position = position + (thumbWidth / 2);
+    var position = ((value - min) / (max - min)) * sliderWidth;
+    position = position + (thumbWidth / 2);
 
-  var span = document.getElementById(spanId);
-  span.innerText = value;
+    var span = document.getElementById(spanId);
+    span.innerText = value;
 
-  if (value == min) {
-    span.style.left = '0px';
-  } else if (value == max) {
-    span.style.left = (sliderWidth + thumbWidth) + 'px';
-  } else {
-    span.style.left = position + 'px';
-  }
+    if (value == min) {
+        span.style.left = '0px';
+    } else if (value == max) {
+        span.style.left = (sliderWidth + thumbWidth) + 'px';
+    } else {
+        span.style.left = position + 'px';
+    }
 }
 
 function applyFilters() {
-  var minFun = document.getElementById('funRangeMin').value || 0;
-  var maxFun = document.getElementById('funRangeMax').value || 10;
-  var minDifficulty = document.getElementById('difficultyRangeMin').value || 0;
-  var maxDifficulty = document.getElementById('difficultyRangeMax').value || 10;
-  var holeInOne = document.getElementById('holeInOne').value || "";
+    var minFun = document.getElementById('funRangeMin').value || 0;
+    var maxFun = document.getElementById('funRangeMax').value || 10;
+    var minDifficulty = document.getElementById('difficultyRangeMin').value || 0;
+    var maxDifficulty = document.getElementById('difficultyRangeMax').value || 10;
+    var holeInOne = document.getElementById('holeInOne').value || "";
 
-  var filteredMaps = window.mapsData.filter(function(map) {
-    var matchesFun = map.funRating >= minFun && map.funRating <= maxFun;
-    var matchesDifficulty = map.hardRating >= minDifficulty && map.hardRating <= maxDifficulty;
-    var matchesHoleInOne = holeInOne === "" || map.courseType === holeInOne;
-
-    return matchesFun && matchesDifficulty && matchesHoleInOne;
-  });
-
-  displayFilteredMaps(filteredMaps);
+    fetchMapData(minFun, maxFun, minDifficulty, maxDifficulty, holeInOne)
+        .then(displayFilteredMaps)
+        .catch(console.error);
 }
 
 function displayFilteredMaps(maps) {
-  var mapSelectionContainer = document.getElementById('map-selection');
-  mapSelectionContainer.innerHTML = ''; // Clear previous results
+    const mapSelection = document.getElementById('map-selection');
+    mapSelection.innerHTML = '';
 
-  maps.forEach(function(map) {
-    createMapBox(map);
-  });
+    if (!maps || maps.length === 0) {
+        console.log("No maps matched the criteria.");
+        return;
+    }
+
+    maps.forEach(function (map) {
+        createMapBox(map);
+    });
 }
 
 function createMapBox(map) {
-  var div = document.createElement('div');
-  div.className = 'map-box';
-  div.onclick = function() {
-    displayMapDetails(map);
-  };
+    const mapSelection = document.getElementById('map-selection');
 
-  var img = document.createElement('img');
-  img.src = map.imageUrl || 'https://via.placeholder.com/150';
-  img.className = 'map-image';
-  div.appendChild(img);
+    const div = document.createElement('div');
+    div.className = 'map-box';
+    div.onclick = function () {
+        displayMapDetails(map.mapName);
+    };
 
-  var span = document.createElement('span');
-  span.className = 'map-title';
-  span.textContent = map.mapName;
-  div.appendChild(span);
+    getMapImageUrl(map.mapName)
+        .then(function (imageUrl) {
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.className = 'map-image';
+            div.appendChild(img);
 
-  var detailsDiv = document.createElement('div');
-  detailsDiv.className = 'map-details';
-  detailsDiv.innerHTML = 'Holes: ' + (map.numHoles || 'N/A') + '<br>' +
-                         'Par: ' + (map.coursePar || 'N/A') + '<br>' +
-                         'Avg Fun: ' + map.avgFun + '<br>' +
-                         'Avg Hard: ' + map.avgHard;
-  div.appendChild(detailsDiv);
+            const span = document.createElement('span');
+            span.className = 'map-title';
+            span.textContent = map.mapName;
+            div.appendChild(span);
 
-  document.getElementById('map-selection').appendChild(div);
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'map-details';
+            detailsDiv.innerHTML = 'Holes: ' + (map.numHoles || 'N/A') + '<br>' +
+                'Par: ' + (map.coursePar || 'N/A') + '<br>' +
+                'Avg Fun: ' + map.avgFun + '<br>' +
+                'Avg Hard: ' + map.avgHard;
+            div.appendChild(detailsDiv);
+
+            mapSelection.appendChild(div);
+        })
+        .catch(console.error);
 }
 
-function displayMapDetails(map) {
-  document.querySelector('.left-panel').style.width = '60%';
-  document.getElementById('expanded-map-details').classList.add('expanded');
+function displayMapDetails(mapName) {
+    document.querySelector('.left-panel').style.width = '60%';
+    const expandedDetails = document.getElementById('expanded-map-details');
+    expandedDetails.classList.add('expanded');
 
-  document.getElementById('expanded-map-title').innerText = map.mapName;
-  document.getElementById('expanded-map-info').innerHTML = ''; // Clear previous data
+    fetchExpandedMapDetails(mapName)
+        .then(function (data) {
+            document.getElementById('expanded-map-title').innerText = mapName;
+            const expandedMapInfo = document.getElementById('expanded-map-info');
+            expandedMapInfo.innerHTML = '';
 
-  var rowHtml = '<tr>' +
-    '<td>' + (map.courseType || 'N/A') + '</td>' +
-    '<td>' + (map.numHoles || 'N/A') + '</td>' +
-    '<td>' + (map.coursePar || 'N/A') + '</td>' +
-    '<td>' + (map.avgFun || 'N/A') + '</td>' +
-    '<td>' + (map.avgHard || 'N/A') + '</td>' +
-  '</tr>';
-  document.getElementById('expanded-map-info').innerHTML += rowHtml;
+            data.forEach(function (row) {
+                const rowHtml = '<tr>' +
+                    '<td>' + (row[0] || 'N/A') + '</td>' +
+                    '<td>' + (row[1] || 'N/A') + '</td>' +
+                    '<td>' + (row[4] || 'N/A') + '</td>' +
+                    '<td>' + (row[5] || 'N/A') + '</td>' +
+                    '<td>' + (row[6] || 'N/A') + '</td>' +
+                    '<td>' + (row[7] || 'N/A') + '</td>' +
+                    '<td>' + (row[8] || 'N/A') + '</td>' +
+                    '</tr>';
+                expandedMapInfo.innerHTML += rowHtml;
+            });
+        })
+        .catch(console.error);
 }
 
 function closeMapDetails() {
-  document.getElementById('expanded-map-details').classList.remove('expanded');
-  document.querySelector('.left-panel').style.width = '100%';
+    const expandedDetails = document.getElementById('expanded-map-details');
+    expandedDetails.classList.remove('expanded');
+    document.querySelector('.left-panel').style.width = '100%';
 }
+
+window.onload = function () {
+    updateSliderValue('funValueLabelMin', document.getElementById('funRangeMin'));
+    updateSliderValue('funValueLabelMax', document.getElementById('funRangeMax'));
+    updateSliderValue('difficultyValueLabelMin', document.getElementById('difficultyRangeMin'));
+    updateSliderValue('difficultyValueLabelMax', document.getElementById('difficultyRangeMax'));
+
+    applyFilters();
+};
