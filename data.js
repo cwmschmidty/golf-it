@@ -3,8 +3,9 @@ const API_KEY = 'AIzaSyBoduy8syGpUpEcM2pGVVd1maIC_qXmLzw';
 const DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
 const SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
 
-// Add your spreadsheet ID here
-const SPREADSHEET_ID = '13DEleKAdbmIKDrOwonoq9flTBw7CgmavfhnM2H7W4ZU';
+let tokenClient;
+let gapiInited = false;
+let gisInited = false;
 
 // Initialize the Google API client
 function initClient() {
@@ -14,73 +15,63 @@ function initClient() {
         discoveryDocs: DISCOVERY_DOCS,
         scope: SCOPES
     }).then(() => {
-        console.log("Google API client initialized.");
+        gapiInited = true;
+        checkAuthStatus();
     }, (error) => {
         console.error(JSON.stringify(error, null, 2));
     });
 }
 
+// Initialize the authorization flow
+function gisInit() {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '',  // defined later
+    });
+    gisInited = true;
+    checkAuthStatus();
+}
+
+function checkAuthStatus() {
+    if (gapiInited && gisInited) {
+        // Check if user is already signed in
+        gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+
+        // If already signed in, fetch data
+        if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+            updateSigninStatus(true);
+        } else {
+            // If not signed in, prompt sign-in
+            promptSignIn();
+        }
+    }
+}
+
+function updateSigninStatus(isSignedIn) {
+    if (isSignedIn) {
+        console.log("User signed in. Fetching data...");
+        applyFilters(); // Fetch data after signing in
+    } else {
+        console.log("User not signed in.");
+    }
+}
+
+function promptSignIn() {
+    tokenClient.callback = (response) => {
+        if (response.error !== undefined) {
+            throw (response);
+        }
+        updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+    };
+
+    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+        updateSigninStatus(true);
+    } else {
+        tokenClient.requestAccessToken({prompt: 'consent'});
+    }
+}
+
 // Load the Google API client library
 gapi.load('client:auth2', initClient);
-
-function fetchMapData(minFun, maxFun, minDifficulty, maxDifficulty, holeInOne) {
-    return gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: SPREADSHEET_ID,
-        range: 'Raw Data!B2:L'
-    }).then((response) => {
-        const data = response.result.values;
-        // Implement your filtering logic based on the min/max fun, difficulty, and holeInOne values
-        return data.filter(row => {
-            const funRating = parseFloat(row[7]);
-            const difficultyRating = parseFloat(row[8]);
-            const courseType = row[3];  // Hole in One Capable
-
-            let holeInOneMatch = true;
-            if (holeInOne === "Yes") {
-                holeInOneMatch = courseType === "Hole in One Capable";
-            } else if (holeInOne === "No") {
-                holeInOneMatch = courseType !== "Hole in One Capable";
-            }
-
-            return funRating >= minFun && funRating <= maxFun &&
-                difficultyRating >= minDifficulty && difficultyRating <= maxDifficulty &&
-                holeInOneMatch;
-        }).map(row => ({
-            mapName: row[10],
-            funRating: row[7],
-            difficultyRating: row[8],
-            courseType: row[3],
-            numHoles: row[4],
-            coursePar: row[5]
-        }));
-    });
-}
-
-function fetchExpandedMapDetails(mapName) {
-    return gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: SPREADSHEET_ID,
-        range: 'Raw Data!B2:L'
-    }).then((response) => {
-        const data = response.result.values;
-        return data.filter(row => row[10] === mapName).map(row => [
-            row[0],  // Who the fuck are you?
-            row[2],  // Type of Course
-            row[3],  // Number of Holes?
-            row[4],  // Course Par?
-            row[5],  // Course Type
-            row[6],  // Aim Markers?
-            row[7],  // Fun Rating
-            row[8],  // Hard Rating
-            row[9]   // Who was better at the course?
-        ]);
-    });
-}
-
-function getMapImageUrl(mapName) {
-    // Here you would implement the logic to fetch the image URL
-    // This could be a pre-stored URL in the Google Sheet or another service
-    // For simplicity, return a placeholder image
-    return new Promise((resolve) => {
-        resolve('https://via.placeholder.com/150');
-    });
-}
+gisInit();
