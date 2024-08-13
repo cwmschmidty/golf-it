@@ -1,0 +1,232 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    transition: width 0.3s ease;
+    overflow-y: auto;
+    max-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.filter-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 10px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.filter-item label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.slider-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.range-slider {
+    position: relative;
+    width: 80%;
+    height: 10px;
+    background: linear-gradient(to right, rgba(0, 255, 0, 0.3), green, red, rgba(255, 0, 0, 0.3));
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.range-slider input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    position: absolute;
+    height: 10px;
+    background: none;
+    pointer-events: none;
+    width: 100%;
+    margin: 0;
+    top: 1px;
+}
+
+.range-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #4CAF50;
+    pointer-events: all;
+    cursor: pointer;
+    position: relative;
+}
+
+.range-slider input[type="range"].max::-webkit-slider-thumb {
+    background: #f44336;
+}
+
+.value-label {
+    position: absolute;
+    top: 0px;
+    font-weight: bold;
+    color: #333;
+    transition: left 0.1s ease;
+    transform: translateX(-50%);
+}
+
+.filter-actions {
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-actions button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.filter-actions button:hover {
+    background-color: #0056b3;
+}
+
+.map-selection-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-around;
+    overflow-y: auto;
+    max-height: 900px;
+}
+
+.map-box {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+    flex-grow: 1;
+    max-width: 250px;
+    min-width: 200px;
+    width: 100%;
+}
+
+.map-box:hover {
+    transform: scale(1.05);
+}
+
+.map-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.map-title {
+    font-weight: bold;
+    margin-top: 10px;
+    color: #333;
+    display: block;
+}
+
+.map-details {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+.expanded-map-details {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+    flex-direction: column;
+    width: 0%;
+    overflow-x: auto;
+    transition: width 0.3s ease;
+}
+
+.expanded-map-details.expanded {
+    width: 60%;
+    display: flex;
+}
+
+.expanded-map-details h2 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.expanded-map-details p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.expanded-map-details .map-info-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.expanded-map-details .map-info-table th, .expanded-map-details .map-info-table td {
+    border: 1px solid #ccc;
+    padding: 2px;
+    text-align: left;
+}
+
+.expanded-map-details .map-info-table th {
+    background-color: #f4f4f9;
+}
+
+.close-btn {
+    margin-top: 10px;
+    background-color: #f44336;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    align-self: flex-end;
+}
+
+.close-btn:hover {
+    background-color: #d32f2f;
+}
