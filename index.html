@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Selection</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="left-panel">
+        <h1>Select a Map</h1>
+        <div class="filter-container">
+            <div class="filter-item">
+                <label for="funRange">Fun Rating:</label>
+                <div class="slider-container">
+                    <div class="range-slider">
+                        <input type="range" id="funRangeMin" min="0" max="10" value="0" oninput="updateSliderValue('funValueLabelMin', this)">
+                        <span id="funValueLabelMin" class="value-label">0</span>
+                        <input type="range" id="funRangeMax" min="0" max="10" value="10" class="max" oninput="updateSliderValue('funValueLabelMax', this)">
+                        <span id="funValueLabelMax" class="value-label">10</span>
+                    </div>
+                </div>
+            </div>
+            <div class="filter-item">
+                <label for="difficultyRange">Difficulty Rating:</label>
+                <div class="slider-container">
+                    <div class="range-slider">
+                        <input type="range" id="difficultyRangeMin" min="0" max="10" value="0" oninput="updateSliderValue('difficultyValueLabelMin', this)">
+                        <span id="difficultyValueLabelMin" class="value-label">0</span>
+                        <input type="range" id="difficultyRangeMax" min="0" max="10" value="10" class="max" oninput="updateSliderValue('difficultyValueLabelMax', this)">
+                        <span id="difficultyValueLabelMax" class="value-label">10</span>
+                    </div>
+                </div>
+            </div>
+            <div class="filter-item">
+                <label for="holeInOne">Hole in One Capable:</label>
+                <select id="holeInOne">
+                    <option value="">Any</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button onclick="applyFilters()">Apply Filters</button>
+        </div>
+        <div id="map-selection" class="map-selection-container">
+            <!-- Map boxes will be generated here -->
+        </div>
+    </div>
+
+    <div id="expanded-map-details" class="expanded-map-details">
+        <h2 id="expanded-map-title"></h2>
+        <div id="expanded-map-image-container"></div>
+        <table class="map-info-table">
+            <thead>
+                <tr>
+                    <th>Who the fuck are you?</th>
+                    <th>Type of Course</th>
+                    <th>Course Type</th>
+                    <th>Aim Markers</th>
+                    <th>Fun Rating</th>
+                    <th>Hard Rating</th>
+                    <th>Who was better at the course?</th>
+                </tr>
+            </thead>
+            <tbody id="expanded-map-info"></tbody>
+        </table>
+        <button class="close-btn" onclick="closeMapDetails()">Close</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
